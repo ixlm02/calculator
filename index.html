@@ -2,33 +2,69 @@
 <html>
 <head>
     <title>Distance Price Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
         #calculator {
-            width: 300px;
-            margin: 20px auto;
+            width: 90%;
+            max-width: 400px;
+            margin: 20px;
             border: 1px solid #ccc;
             padding: 20px;
             box-sizing: border-box;
         }
         input[type="number"] {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
             box-sizing: border-box;
+            font-size: 16px;
         }
         button {
             width: 100%;
-            padding: 10px;
+            padding: 15px;
             background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
+            font-size: 16px;
         }
         #result {
-            margin-top: 10px;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        #message {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #eee;
+            background-color: #f9f9f9;
+            font-size: 16px;
+            position: relative;
+            min-height: 120px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        #copyButton {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ddd;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .bold-price{
             font-weight: bold;
         }
     </style>
@@ -45,6 +81,7 @@
         <button onclick="calculatePrice()">Calculate Price</button>
 
         <div id="result"></div>
+        <div id="message"></div>
     </div>
 
     <script>
@@ -55,9 +92,36 @@
             if (!isNaN(totalKm) && !isNaN(pricePerKm)) {
                 var totalPrice = totalKm * pricePerKm;
                 document.getElementById('result').textContent = "Total Price: $" + totalPrice.toFixed(2);
+
+                var message = "Hello,\n\nThe price for your ride is <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span>. The charge is $" + pricePerKm.toFixed(2) + " per kilometer, and the total distance to your destination is " + totalKm.toFixed(2) + "km. Please E-transfer <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span> to t.islam20001@gmail.com before reaching your final destination.\n\nThank you for riding with me.";
+                document.getElementById('message').innerHTML = message;
+
+                if (!document.getElementById('copyButton')) {
+                    var copyButton = document.createElement('button');
+                    copyButton.id = 'copyButton';
+                    copyButton.textContent = 'Copy';
+                    copyButton.onclick = copyMessage;
+                    document.getElementById('message').appendChild(copyButton);
+                }
+
             } else {
                 document.getElementById('result').textContent = "Invalid input.";
+                document.getElementById('message').textContent = "";
+                if (document.getElementById('copyButton')) {
+                    document.getElementById('copyButton').remove();
+                }
+
             }
+        }
+
+        function copyMessage() {
+            var message = document.getElementById('message').textContent;
+            navigator.clipboard.writeText(message).then(function() {
+                alert('Message copied to clipboard!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+                alert('Could not copy text.');
+            });
         }
     </script>
 
