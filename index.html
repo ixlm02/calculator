@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Google Maps Directions</title>
+    <title>Distance Price Calculator</title>
     <style>
         body {
             font-family: sans-serif;
         }
-        #map-link-form {
+        #calculator {
             width: 300px;
             margin: 20px auto;
             border: 1px solid #ccc;
             padding: 20px;
             box-sizing: border-box;
         }
-        input[type="text"] {
+        input[type="number"] {
             width: 100%;
             padding: 8px;
             margin-bottom: 10px;
@@ -27,26 +27,37 @@
             border: none;
             cursor: pointer;
         }
+        #result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <div id="map-link-form">
-        <label for="start">Start Location:</label><br>
-        <input type="text" id="start" name="start"><br><br>
+    <div id="calculator">
+        <label for="totalKm">Total Kilometers:</label>
+        <input type="number" id="totalKm" value="0">
 
-        <label for="end">End Location:</label><br>
-        <input type="text" id="end" name="end"><br><br>
+        <label for="pricePerKm">Price per Kilometer:</label>
+        <input type="number" id="pricePerKm" value="1.00">
 
-        <button onclick="openGoogleMaps()">Get Directions on Google Maps</button>
+        <button onclick="calculatePrice()">Calculate Price</button>
+
+        <div id="result"></div>
     </div>
 
     <script>
-        function openGoogleMaps() {
-            var start = document.getElementById("start").value;
-            var end = document.getElementById("end").value;
-            var googleMapsUrl = "https://www.google.com/maps/dir/?api=1&origin=$" + encodeURIComponent(start) + "&destination=" + encodeURIComponent(end);
-            window.open(googleMapsUrl, '_blank');
+        function calculatePrice() {
+            var totalKm = parseFloat(document.getElementById('totalKm').value);
+            var pricePerKm = parseFloat(document.getElementById('pricePerKm').value);
+
+            if (!isNaN(totalKm) && !isNaN(pricePerKm)) {
+                var totalPrice = totalKm * pricePerKm;
+                document.getElementById('result').textContent = "Total Price: $" + totalPrice.toFixed(2);
+            } else {
+                document.getElementById('result').textContent = "Invalid input.";
+            }
         }
     </script>
 
