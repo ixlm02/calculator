@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps Directions</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        #map-link-form {
+            width: 300px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map-link-form">
+        <label for="start">Start Location:</label><br>
+        <input type="text" id="start" name="start"><br><br>
+
+        <label for="end">End Location:</label><br>
+        <input type="text" id="end" name="end"><br><br>
+
+        <button onclick="openGoogleMaps()">Get Directions on Google Maps</button>
+    </div>
+
+    <script>
+        function openGoogleMaps() {
+            var start = document.getElementById("start").value;
+            var end = document.getElementById("end").value;
+            var googleMapsUrl = "https://www.google.com/maps/dir/?api=1&origin=$" + encodeURIComponent(start) + "&destination=" + encodeURIComponent(end);
+            window.open(googleMapsUrl, '_blank');
+        }
+    </script>
+
+</body>
+</html>
