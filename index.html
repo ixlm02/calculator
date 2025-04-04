@@ -24,6 +24,15 @@
             display: flex;
             flex-direction: column;
         }
+        .price-options {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .price-options legend {
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
         input[type="number"] {
             width: 100%;
             padding: 10px;
@@ -39,6 +48,7 @@
             border: none;
             cursor: pointer;
             font-size: 16px;
+            margin-bottom: 15px;
         }
         #result {
             margin-top: 15px;
@@ -57,17 +67,19 @@
             white-space: pre-wrap;
         }
         #copyButton {
-            position: absolute;
-            top: 5px;
-            right: 5px;
+            width: 100%;
+            padding: 15px;
             background-color: #ddd;
             border: none;
-            padding: 8px 12px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
         }
         .bold-price {
             font-weight: bold;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -75,10 +87,14 @@
 
     <div id="calculator">
         <label for="totalKm">Total Kilometers:</label>
-        <input type="number" id="totalKm" value="0">
+        <input type="number" id="totalKm" value="0" min="0">
 
-        <label for="pricePerKm">Price per Kilometer:</label>
-        <input type="number" id="pricePerKm" value="1.00">
+        <fieldset class="price-options">
+            <legend>Price Select</legend>
+            <label><input type="checkbox" id="regularPrice"> Regular Price ($1.45/km)</label><br>
+            <label><input type="checkbox" id="lateNightPrice"> Late Night Price ($2.00/km)</label><br>
+            <label><input type="checkbox" id="specialWeatherPrice"> Special Weather Price ($2.45/km)</label><br>
+        </fieldset>
 
         <label><input type="checkbox" id="returningCustomer5"> Returning Customer (5% Discount)</label><br>
         <label><input type="checkbox" id="returningCustomer10"> Returning Customer (10% Discount)</label><br>
@@ -86,63 +102,83 @@
         <button onclick="calculatePrice()">Calculate Price</button>
 
         <div id="result"></div>
+        <button id="copyButton" style="display: none;" onclick="copyMessage()">Copy</button>
         <div id="message"></div>
+        <div id="error" class="error"></div>
     </div>
 
     <script>
         function calculatePrice() {
             const totalKm = parseFloat(document.getElementById("totalKm").value);
-            const pricePerKm = parseFloat(document.getElementById("pricePerKm").value);
+            const regularPrice = document.getElementById("regularPrice").checked;
+            const lateNightPrice = document.getElementById("lateNightPrice").checked;
+            const specialWeatherPrice = document.getElementById("specialWeatherPrice").checked;
             const returningCustomer5 = document.getElementById("returningCustomer5").checked;
             const returningCustomer10 = document.getElementById("returningCustomer10").checked;
+            const errorDiv = document.getElementById("error");
 
-            if (!isNaN(totalKm) && !isNaN(pricePerKm)) {
-                let totalPrice = totalKm * pricePerKm;
-
-                if (returningCustomer5) {
-                    totalPrice *= 0.95; // 5% discount
-                } else if (returningCustomer10) {
-                    totalPrice *= 0.90; // 10% discount
-                }
-
-                if (totalPrice < 5) {
-                    totalPrice = 5;
-                }
-
-                document.getElementById("result").textContent = "Total Price: $" + totalPrice.toFixed(2);
-                let message = `Hello,<br>`;
-                if (returningCustomer5) {
-                    message += "Thank you for riding again. As a token of appreciation for your business, a 5% discount has been added to the price.<br><br>";
-                } else if (returningCustomer10) {
-                    message += "Thank you for riding again. As a token of appreciation for your business, a 10% discount has been added to the price.<br><br>";
-                }
-                message += `The price for your ride is <span class='bold-price'>$${totalPrice.toFixed(2)}</span>.<br><br>The distance to your destination is ${totalKm.toFixed(2)} km.<br><br>After pick up, please E-Transfer <span class='bold-price'>$${totalPrice.toFixed(2)}</span> to t.islam20001@gmail.com before reaching your destination.<br><br>Thank you for riding with me.<br><br>This is an automated message, all prices are non-negotiable.`;
-                document.getElementById('message').innerHTML = message;
-
-                if (!document.getElementById('copyButton')) {
-                    var copyButton = document.createElement('button');
-                    copyButton.id = 'copyButton';
-                    copyButton.textContent = 'Copy';
-                    copyButton.onclick = copyMessage;
-                    document.getElementById('message').appendChild(copyButton);
-                }
-
-            } else {
-                document.getElementById("result").textContent = "Invalid input.";
+            if (isNaN(totalKm) || totalKm < 0) {
+                errorDiv.textContent = "Invalid input. Please enter valid positive numbers.";
+                document.getElementById("result").textContent = "";
                 document.getElementById("message").textContent = "";
-                if (document.getElementById('copyButton')) {
-                    document.getElementById('copyButton').remove();
-                }
+                document.getElementById('copyButton').style.display = "none";
+                return;
             }
+
+            errorDiv.textContent = "";
+
+            let totalPrice = calculateTotalPrice(totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10);
+
+            document.getElementById("result").textContent = "Total Price: $" + totalPrice.toFixed(2);
+            document.getElementById("message").innerHTML = generateMessage(totalPrice, totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10);
+            document.getElementById('copyButton').style.display = "block";
+        }
+
+        function calculateTotalPrice(totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10) {
+            let pricePerKm = 1.45; // Default regular price
+            if (lateNightPrice) {
+                pricePerKm = 2.00;
+            } else if (specialWeatherPrice) {
+                pricePerKm = 2.45;
+            }
+
+            let totalPrice = totalKm * pricePerKm;
+
+            if (returningCustomer5) {
+                totalPrice *= 0.95;
+            } else if (returningCustomer10) {
+                totalPrice *= 0.90;
+            }
+
+            return Math.max(5, totalPrice);
+        }
+
+        function generateMessage(totalPrice, totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10) {
+            let message = `Hello,<br>`;
+            if (returningCustomer5) {
+                message += "Thank you for riding again. As a token of appreciation for your business, a 5% discount has been added to the price.<br><br>";
+            } else if (returningCustomer10) {
+                message += "Thank you for riding again. As a token of appreciation for your business, a 10% discount has been added to the price.<br><br>";
+            }
+
+            let priceType = "Regular ($1.45 per Km)";
+            if(lateNightPrice){
+                priceType = "Late Night ($2.00 per Km)";
+            } else if (specialWeatherPrice){
+                priceType = "Special Weather ($2.45 per Km)";
+            }
+
+            message += `The price for your ride is <span class='bold-price'>$${totalPrice.toFixed(2)}</span>.<br><br>The distance to your destination is ${totalKm.toFixed(2)} km.<br>Price Type: ${priceType}.<br><br>After pick up, please E-Transfer <span class='bold-price'>$${totalPrice.toFixed(2)}</span> to t.islam20001@gmail.com before reaching your destination.<br><br>Thank you for riding with me.<br><br>This is an automated message, all prices are non-negotiable.`;
+            return message;
         }
 
         function copyMessage() {
-            var messageDiv = document.getElementById('message').cloneNode(true);
+            const messageDiv = document.getElementById('message').cloneNode(true);
             var copyButton = messageDiv.querySelector('#copyButton');
             if (copyButton) {
                 messageDiv.removeChild(copyButton);
             }
-            var message = messageDiv.textContent;
+            const message = messageDiv.textContent;
             navigator.clipboard.writeText(message).then(function() {
                 alert('Message copied to clipboard!');
             }, function(err) {
