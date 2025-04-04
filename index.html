@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Distance Price Calculator</title>
-    <meta name="viewport" content="width:device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: sans-serif;
@@ -21,6 +21,8 @@
             border: 1px solid #ccc;
             padding: 20px;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
         input[type="number"] {
             width: 100%;
@@ -78,8 +80,8 @@
         <label for="pricePerKm">Price per Kilometer:</label>
         <input type="number" id="pricePerKm" value="1.00">
 
-        <label><input type="checkbox" id="specialEvent"> Special Event (+0.40$/km)</label><br>
-        <label><input type="checkbox" id="returningCustomer"> Returning Customer (5% Discount)</label><br>
+        <label><input type="checkbox" id="returningCustomer5"> Returning Customer (5% Discount)</label><br>
+        <label><input type="checkbox" id="returningCustomer10"> Returning Customer (10% Discount)</label><br>
 
         <button onclick="calculatePrice()">Calculate Price</button>
 
@@ -89,31 +91,32 @@
 
     <script>
         function calculatePrice() {
-            var totalKm = parseFloat(document.getElementById('totalKm').value);
-            var pricePerKm = parseFloat(document.getElementById('pricePerKm').value);
-            var specialEvent = document.getElementById('specialEvent').checked;
-            var returningCustomer = document.getElementById('returningCustomer').checked;
-            var message = "Hello,<br>";
+            const totalKm = parseFloat(document.getElementById("totalKm").value);
+            const pricePerKm = parseFloat(document.getElementById("pricePerKm").value);
+            const returningCustomer5 = document.getElementById("returningCustomer5").checked;
+            const returningCustomer10 = document.getElementById("returningCustomer10").checked;
 
             if (!isNaN(totalKm) && !isNaN(pricePerKm)) {
-                var calculatedPricePerKm = pricePerKm;
-                if (specialEvent) {
-                    calculatedPricePerKm += 0.40;
-                    message += "Special event selected, 0.40$ per kilometer added to the price.<br>";
+                let totalPrice = totalKm * pricePerKm;
+
+                if (returningCustomer5) {
+                    totalPrice *= 0.95; // 5% discount
+                } else if (returningCustomer10) {
+                    totalPrice *= 0.90; // 10% discount
                 }
 
-                var totalPrice = totalKm * calculatedPricePerKm;
+                if (totalPrice < 5) {
+                    totalPrice = 5;
+                }
 
-                message += "The charge is $" + calculatedPricePerKm.toFixed(2) + " per kilometer, and the total distance to your destination is " + totalKm.toFixed(2) + "km.<br><br>";
-
-                if (returningCustomer) {
-                    totalPrice *= 0.95; // Apply 5% discount
+                document.getElementById("result").textContent = "Total Price: $" + totalPrice.toFixed(2);
+                let message = `Hello,<br>`;
+                if (returningCustomer5) {
                     message += "Thank you for riding again. As a token of appreciation for your business, a 5% discount has been added to the price.<br><br>";
+                } else if (returningCustomer10) {
+                    message += "Thank you for riding again. As a token of appreciation for your business, a 10% discount has been added to the price.<br><br>";
                 }
-
-                document.getElementById('result').textContent = "Total Price: $" + totalPrice.toFixed(2);
-
-                message += "The price for your ride is <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span>.<br><br>After pick up, please E-Transfer <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span> to t.islam20001@gmail.com before reaching your destination.<br><br>Thank you for riding with me.<br><br>This is an automated message, all prices are non-negotiable.";
+                message += `The price for your ride is <span class='bold-price'>$${totalPrice.toFixed(2)}</span>.<br><br>After pick up, please E-Transfer <span class='bold-price'>$${totalPrice.toFixed(2)}</span> to t.islam20001@gmail.com before reaching your destination.<br><br>Thank you for riding with me.<br><br>This is an automated message, all prices are non-negotiable.`;
                 document.getElementById('message').innerHTML = message;
 
                 if (!document.getElementById('copyButton')) {
@@ -125,8 +128,8 @@
                 }
 
             } else {
-                document.getElementById('result').textContent = "Invalid input.";
-                document.getElementById('message').textContent = "";
+                document.getElementById("result").textContent = "Invalid input.";
+                document.getElementById("message").textContent = "";
                 if (document.getElementById('copyButton')) {
                     document.getElementById('copyButton').remove();
                 }
@@ -134,12 +137,12 @@
         }
 
         function copyMessage() {
-            var messageDiv = document.getElementById('message').cloneNode(true); // Clone the message div
-            var copyButton = messageDiv.querySelector('#copyButton'); // Find the copy button
+            var messageDiv = document.getElementById('message').cloneNode(true);
+            var copyButton = messageDiv.querySelector('#copyButton');
             if (copyButton) {
-                messageDiv.removeChild(copyButton); // Remove the copy button
+                messageDiv.removeChild(copyButton);
             }
-            var message = messageDiv.textContent; // Get the text content of the cloned div
+            var message = messageDiv.textContent;
             navigator.clipboard.writeText(message).then(function() {
                 alert('Message copied to clipboard!');
             }, function(err) {
@@ -148,6 +151,5 @@
             });
         }
     </script>
-
 </body>
 </html>
