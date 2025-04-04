@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Distance Price Calculator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width:device-width, initial-scale=1.0">
     <style>
         body {
             font-family: sans-serif;
@@ -93,27 +93,27 @@
             var pricePerKm = parseFloat(document.getElementById('pricePerKm').value);
             var specialEvent = document.getElementById('specialEvent').checked;
             var returningCustomer = document.getElementById('returningCustomer').checked;
-            var message = "Hello,";
+            var message = "Hello,<br>";
 
             if (!isNaN(totalKm) && !isNaN(pricePerKm)) {
                 var calculatedPricePerKm = pricePerKm;
                 if (specialEvent) {
                     calculatedPricePerKm += 0.40;
-                    message += "Special event selected, 0.40$ per kilometer added to the price.";
+                    message += "Special event selected, 0.40$ per kilometer added to the price.<br>";
                 }
 
                 var totalPrice = totalKm * calculatedPricePerKm;
 
-                message += "The charge is $" + calculatedPricePerKm.toFixed(2) + " per kilometer, and the total distance to your destination is " + totalKm.toFixed(2) + "km.";
+                message += "The charge is $" + calculatedPricePerKm.toFixed(2) + " per kilometer, and the total distance to your destination is " + totalKm.toFixed(2) + "km.<br><br>";
 
                 if (returningCustomer) {
                     totalPrice *= 0.95; // Apply 5% discount
-                    message += "Thank you for riding again. As a token of appreciation for your business, a 5% discount has been added to the price.";
+                    message += "Thank you for riding again. As a token of appreciation for your business, a 5% discount has been added to the price.<br><br>";
                 }
 
                 document.getElementById('result').textContent = "Total Price: $" + totalPrice.toFixed(2);
 
-                message += "The price for your ride is <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span>. After pick up, please E-Transfer <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span> to t.islam20001@gmail.com before reaching your destination. Thank you for riding with me.This is an automated message, all prices are non-negotiable.";
+                message += "The price for your ride is <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span>.<br><br>After pick up, please E-Transfer <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span> to t.islam20001@gmail.com before reaching your destination.<br><br>Thank you for riding with me.<br><br>This is an automated message, all prices are non-negotiable.";
                 document.getElementById('message').innerHTML = message;
 
                 if (!document.getElementById('copyButton')) {
@@ -134,7 +134,12 @@
         }
 
         function copyMessage() {
-            var message = document.getElementById('message').textContent;
+            var messageDiv = document.getElementById('message').cloneNode(true); // Clone the message div
+            var copyButton = messageDiv.querySelector('#copyButton'); // Find the copy button
+            if (copyButton) {
+                messageDiv.removeChild(copyButton); // Remove the copy button
+            }
+            var message = messageDiv.textContent; // Get the text content of the cloned div
             navigator.clipboard.writeText(message).then(function() {
                 alert('Message copied to clipboard!');
             }, function(err) {
