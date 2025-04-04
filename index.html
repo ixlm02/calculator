@@ -13,19 +13,28 @@
             align-items: center;
             min-height: 100vh;
             box-sizing: border-box;
+            flex-direction: column;
+            background-color: #000;
+            color: #fff;
+        }
+        #logo {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
         #calculator {
             width: 90%;
             max-width: 400px;
             margin: 20px;
-            border: 1px solid #ccc;
+            border: 1px solid #333;
             padding: 20px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            background-color: #111;
         }
         .price-options {
-            border: 1px solid #ddd;
+            border: 1px solid #333;
             padding: 10px;
             margin-bottom: 15px;
         }
@@ -39,12 +48,15 @@
             margin-bottom: 15px;
             box-sizing: border-box;
             font-size: 16px;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #444;
         }
         button {
             width: 100%;
             padding: 15px;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #008000;
+            color: #fff;
             border: none;
             cursor: pointer;
             font-size: 16px;
@@ -58,8 +70,8 @@
         #message {
             margin-top: 20px;
             padding: 10px;
-            border: 1px solid #eee;
-            background-color: #f9f9f9;
+            border: 1px solid #333;
+            background-color: #222;
             font-size: 16px;
             position: relative;
             min-height: 120px;
@@ -69,21 +81,28 @@
         #copyButton {
             width: 100%;
             padding: 15px;
-            background-color: #ddd;
+            background-color: #444;
+            color: #fff;
             border: none;
             cursor: pointer;
             font-size: 16px;
         }
         .bold-price {
             font-weight: bold;
+            color: #00ff00;
         }
         .error {
-            color: red;
+            color: #ff4500;
             margin-top: 10px;
+        }
+        label {
+            color: #fff;
         }
     </style>
 </head>
 <body>
+
+    <div id="logo">TBAY Rides</div>
 
     <div id="calculator">
         <label for="totalKm">Total Kilometers:</label>
@@ -129,13 +148,19 @@
 
             let totalPrice = calculateTotalPrice(totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10);
 
-            document.getElementById("result").textContent = "Total Price: $" + totalPrice.toFixed(2);
-            document.getElementById("message").innerHTML = generateMessage(totalPrice, totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10);
+            let resultText = "Total Price: $" + totalPrice.toFixed(2);
+            if(totalKm < 3.4 && totalPrice === 5){
+                resultText += " (Minimum $5.00 Price Applied)";
+            }
+
+            document.getElementById("result").textContent = resultText;
+            document.getElementById("message").innerHTML = generateMessage(totalPrice, totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10, totalKm);
+
             document.getElementById('copyButton').style.display = "block";
         }
 
         function calculateTotalPrice(totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10) {
-            let pricePerKm = 1.45; // Default regular price
+            let pricePerKm = 1.45;
             if (lateNightPrice) {
                 pricePerKm = 2.00;
             } else if (specialWeatherPrice) {
@@ -153,12 +178,13 @@
             return Math.max(5, totalPrice);
         }
 
-        function generateMessage(totalPrice, totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10) {
+        function generateMessage(totalPrice, totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10, totalKmInput) {
             let message = `Hello,<br>`;
-            if (returningCustomer5) {
-                message += "Thank you for riding again. As a token of appreciation for your business, a 5% discount has been added to the price.<br><br>";
-            } else if (returningCustomer10) {
-                message += "Thank you for riding again. As a token of appreciation for your business, a 10% discount has been added to the price.<br><br>";
+            let pricePerKm = 1.45;
+            if (lateNightPrice) {
+                pricePerKm = 2.00;
+            } else if (specialWeatherPrice) {
+                pricePerKm = 2.45;
             }
 
             let priceType = "Regular ($1.45 per Km)";
@@ -168,7 +194,27 @@
                 priceType = "Special Weather ($2.45 per Km)";
             }
 
-            message += `The price for your ride is <span class='bold-price'>$${totalPrice.toFixed(2)}</span>.<br><br>The distance to your destination is ${totalKm.toFixed(2)} km.<br>Price Type: ${priceType}.<br><br>After pick up, please E-Transfer <span class='bold-price'>$${totalPrice.toFixed(2)}</span> to t.islam20001@gmail.com before reaching your destination.<br><br>Thank you for riding with me.<br><br>This is an automated message, all prices are non-negotiable.`;
+            let basePrice = totalKm * pricePerKm;
+            let discountAmount = 0;
+
+            if (returningCustomer5) {
+                discountAmount += basePrice * 0.05;
+            } else if (returningCustomer10) {
+                discountAmount += basePrice * 0.10;
+            }
+
+            message += `The price for your ride is <span class='bold-price'>$${totalPrice.toFixed(2)}</span>.<br><br>The distance to your destination is ${totalKm.toFixed(2)} km.<br>Price Type: ${priceType}.<br><br>`;
+            message += `Price Breakdown:<br>Distance: ${totalKm.toFixed(2)}km * $${pricePerKm.toFixed(2)} = $${basePrice.toFixed(2)}<br>`;
+            if (discountAmount > 0) {
+                message += `Discount: -$${discountAmount.toFixed(2)}<br>`;
+            }
+            message += `Total: $${totalPrice.toFixed(2)}<br><br>`;
+
+            if(totalKmInput < 3.4){
+                message += `Your ride is below 3.4km, the minimum price has been set to $5.00.<br><br>`;
+            }
+
+            message += `After pick up, please E-Transfer <span class='bold-price'>$${totalPrice.toFixed(2)}</span> to t.islam20001@gmail.com before reaching your destination.<br><br>Thank you for riding with me.<br><br>This is an automated message, all prices are non-negotiable.`;
             return message;
         }
 
