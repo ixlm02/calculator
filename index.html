@@ -64,7 +64,7 @@
             cursor: pointer;
             font-size: 14px;
         }
-        .bold-price{
+        .bold-price {
             font-weight: bold;
         }
     </style>
@@ -78,6 +78,9 @@
         <label for="pricePerKm">Price per Kilometer:</label>
         <input type="number" id="pricePerKm" value="1.00">
 
+        <label><input type="checkbox" id="specialEvent"> Special Event (+0.40$/km)</label><br>
+        <label><input type="checkbox" id="returningCustomer"> Returning Customer (5% Discount)</label><br>
+
         <button onclick="calculatePrice()">Calculate Price</button>
 
         <div id="result"></div>
@@ -88,12 +91,29 @@
         function calculatePrice() {
             var totalKm = parseFloat(document.getElementById('totalKm').value);
             var pricePerKm = parseFloat(document.getElementById('pricePerKm').value);
+            var specialEvent = document.getElementById('specialEvent').checked;
+            var returningCustomer = document.getElementById('returningCustomer').checked;
+            var message = "Hello,";
 
             if (!isNaN(totalKm) && !isNaN(pricePerKm)) {
-                var totalPrice = totalKm * pricePerKm;
+                var calculatedPricePerKm = pricePerKm;
+                if (specialEvent) {
+                    calculatedPricePerKm += 0.40;
+                    message += "Special event selected, 0.40$ per kilometer added to the price.";
+                }
+
+                var totalPrice = totalKm * calculatedPricePerKm;
+
+                message += "The charge is $" + calculatedPricePerKm.toFixed(2) + " per kilometer, and the total distance to your destination is " + totalKm.toFixed(2) + "km.";
+
+                if (returningCustomer) {
+                    totalPrice *= 0.95; // Apply 5% discount
+                    message += "Thank you for riding again. As a token of appreciation for your business, a 5% discount has been added to the price.";
+                }
+
                 document.getElementById('result').textContent = "Total Price: $" + totalPrice.toFixed(2);
 
-                var message = "Hello,\n\nThe price for your ride is <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span>. The charge is $" + pricePerKm.toFixed(2) + " per kilometer, and the total distance to your destination is " + totalKm.toFixed(2) + "km. Please E-transfer <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span> to t.islam20001@gmail.com before reaching your final destination.\n\nThank you for riding with me.";
+                message += "The price for your ride is <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span>. After pick up, please E-Transfer <span class='bold-price'>$" + totalPrice.toFixed(2) + "</span> to t.islam20001@gmail.com before reaching your destination. Thank you for riding with me.This is an automated message, all prices are non-negotiable.";
                 document.getElementById('message').innerHTML = message;
 
                 if (!document.getElementById('copyButton')) {
@@ -110,7 +130,6 @@
                 if (document.getElementById('copyButton')) {
                     document.getElementById('copyButton').remove();
                 }
-
             }
         }
 
