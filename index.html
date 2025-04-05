@@ -22,6 +22,14 @@
         #logo {
             font-size: 2em;
             font-weight: bold;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        #slogan {
+            font-size: 1em;
+            font-style: italic;
+            text-align: center;
             margin-bottom: 20px;
         }
 
@@ -135,6 +143,19 @@
             overflow-y: auto;
         }
 
+        #descriptionModal h2 {
+            margin-bottom: 10px;
+        }
+
+        #descriptionModal ol {
+            margin-bottom: 10px;
+            padding-left: 20px;
+        }
+
+        #descriptionModal li {
+            margin-bottom: 5px;
+        }
+
         #descriptionModal p {
             margin-bottom: 15px;
         }
@@ -144,6 +165,7 @@
 <body>
 
     <div id="logo">TBay Rides</div>
+    <div id="slogan">Your Way.</div>
 
     <div id="calculator">
         <label for="totalKm">Total Kilometers:</label>
@@ -162,6 +184,7 @@
             <option value="0">No Discount</option>
             <option value="0.05">Returning Customer (5% Discount)</option>
             <option value="0.10">Returning Customer (10% Discount)</option>
+            <option value="0.15">Returning Customer (15% Discount)</option>
         </select>
 
         <label for="email">E-Transfer Email:</label>
@@ -185,7 +208,7 @@
             <li>Choose any applicable discounts.</li>
             <li>Enter your E-Transfer email address.</li>
             <li>Click "Calculate Price" to generate the fare breakdown.</li>
-            <li>Copy the message for your records or payment reference.</li>
+            <li>Copy and paste the generated message and send it to your customer.</li>
         </ol>
         <p><strong>Note:</strong> The calculated price is non-negotiable. For distances below 3.4km, a minimum fare of $5.00 applies.</p>
         <button onclick="hideDescription()">Close</button>
