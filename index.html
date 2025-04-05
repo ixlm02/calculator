@@ -34,15 +34,10 @@
             background-color: #111;
         }
         .price-options {
-            border: 1px solid #333;
             padding: 10px;
             margin-bottom: 15px;
         }
-        .price-options legend {
-            font-weight: bold;
-            padding-bottom: 5px;
-        }
-        input[type="number"] {
+        input[type="number"], select {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -108,15 +103,19 @@
         <label for="totalKm">Total Kilometers:</label>
         <input type="number" id="totalKm" value="0" min="0">
 
-        <fieldset class="price-options">
-            <legend>Price Select</legend>
-            <label><input type="checkbox" id="regularPrice"> Regular Price ($1.45/km)</label><br>
-            <label><input type="checkbox" id="lateNightPrice"> Late Night Price ($2.00/km)</label><br>
-            <label><input type="checkbox" id="specialWeatherPrice"> Special Weather Price ($2.45/km)</label><br>
-        </fieldset>
+        <label for="priceSelect">Price Select:</label>
+        <select id="priceSelect">
+            <option value="1.45">Regular Price ($1.45/km)</option>
+            <option value="2.00">Late Night Price ($2.00/km)</option>
+            <option value="2.45">Special Weather Price ($2.45/km)</option>
+        </select>
 
-        <label><input type="checkbox" id="returningCustomer5"> Returning Customer (5% Discount)</label><br>
-        <label><input type="checkbox" id="returningCustomer10"> Returning Customer (10% Discount)</label><br>
+        <label for="discountSelect">Discount:</label>
+        <select id="discountSelect">
+            <option value="0">No Discount</option>
+            <option value="0.05">Returning Customer (5% Discount)</option>
+            <option value="0.10">Returning Customer (10% Discount)</option>
+        </select>
 
         <button onclick="calculatePrice()">Calculate Price</button>
 
@@ -129,11 +128,8 @@
     <script>
         function calculatePrice() {
             const totalKm = parseFloat(document.getElementById("totalKm").value);
-            const regularPrice = document.getElementById("regularPrice").checked;
-            const lateNightPrice = document.getElementById("lateNightPrice").checked;
-            const specialWeatherPrice = document.getElementById("specialWeatherPrice").checked;
-            const returningCustomer5 = document.getElementById("returningCustomer5").checked;
-            const returningCustomer10 = document.getElementById("returningCustomer10").checked;
+            const pricePerKm = parseFloat(document.getElementById("priceSelect").value);
+            const discount = parseFloat(document.getElementById("discountSelect").value);
             const errorDiv = document.getElementById("error");
 
             if (isNaN(totalKm) || totalKm < 0) {
@@ -146,7 +142,7 @@
 
             errorDiv.textContent = "";
 
-            let totalPrice = calculateTotalPrice(totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10);
+            let totalPrice = calculateTotalPrice(totalKm, pricePerKm, discount);
 
             let resultText = "Total Price: $" + totalPrice.toFixed(2);
             if(totalKm < 3.4 && totalPrice === 5){
@@ -154,54 +150,29 @@
             }
 
             document.getElementById("result").textContent = resultText;
-            document.getElementById("message").innerHTML = generateMessage(totalPrice, totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10, totalKm);
+            document.getElementById("message").innerHTML = generateMessage(totalPrice, totalKm, pricePerKm, discount, totalKm);
 
             document.getElementById('copyButton').style.display = "block";
         }
 
-        function calculateTotalPrice(totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10) {
-            let pricePerKm = 1.45;
-            if (lateNightPrice) {
-                pricePerKm = 2.00;
-            } else if (specialWeatherPrice) {
-                pricePerKm = 2.45;
-            }
-
+        function calculateTotalPrice(totalKm, pricePerKm, discount) {
             let totalPrice = totalKm * pricePerKm;
-
-            if (returningCustomer5) {
-                totalPrice *= 0.95;
-            } else if (returningCustomer10) {
-                totalPrice *= 0.90;
-            }
-
+            totalPrice *= (1 - discount);
             return Math.max(5, totalPrice);
         }
 
-        function generateMessage(totalPrice, totalKm, regularPrice, lateNightPrice, specialWeatherPrice, returningCustomer5, returningCustomer10, totalKmInput) {
+        function generateMessage(totalPrice, totalKm, pricePerKm, discount, totalKmInput) {
             let message = `Hello,<br>`;
-            let pricePerKm = 1.45;
-            if (lateNightPrice) {
-                pricePerKm = 2.00;
-            } else if (specialWeatherPrice) {
-                pricePerKm = 2.45;
-            }
 
             let priceType = "Regular ($1.45 per Km)";
-            if(lateNightPrice){
+            if(pricePerKm === 2.00){
                 priceType = "Late Night ($2.00 per Km)";
-            } else if (specialWeatherPrice){
+            } else if (pricePerKm === 2.45){
                 priceType = "Special Weather ($2.45 per Km)";
             }
 
             let basePrice = totalKm * pricePerKm;
-            let discountAmount = 0;
-
-            if (returningCustomer5) {
-                discountAmount += basePrice * 0.05;
-            } else if (returningCustomer10) {
-                discountAmount += basePrice * 0.10;
-            }
+            let discountAmount = basePrice * discount;
 
             message += `The price for your ride is <span class='bold-price'>$${totalPrice.toFixed(2)}</span>.<br><br>The distance to your destination is ${totalKm.toFixed(2)} km.<br>Price Type: ${priceType}.<br><br>`;
             message += `Price Breakdown:<br>Distance: ${totalKm.toFixed(2)}km * $${pricePerKm.toFixed(2)} = $${basePrice.toFixed(2)}<br>`;
