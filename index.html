@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Distance Price Calculator</title>
+    <title>TBay Rides Fare Calculator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
@@ -17,11 +18,13 @@
             background-color: #000;
             color: #fff;
         }
+
         #logo {
             font-size: 2em;
             font-weight: bold;
             margin-bottom: 20px;
         }
+
         #calculator {
             width: 90%;
             max-width: 400px;
@@ -33,11 +36,15 @@
             flex-direction: column;
             background-color: #111;
         }
+
         .price-options {
             padding: 10px;
             margin-bottom: 15px;
         }
-        input[type="number"], select {
+
+        input[type="number"],
+        input[type="email"],
+        select {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -47,6 +54,7 @@
             color: #fff;
             border: 1px solid #444;
         }
+
         button {
             width: 100%;
             padding: 15px;
@@ -57,11 +65,13 @@
             font-size: 16px;
             margin-bottom: 15px;
         }
+
         #result {
             margin-top: 15px;
             font-weight: bold;
             font-size: 16px;
         }
+
         #message {
             margin-top: 20px;
             padding: 10px;
@@ -73,6 +83,7 @@
             word-wrap: break-word;
             white-space: pre-wrap;
         }
+
         #copyButton {
             width: 100%;
             padding: 15px;
@@ -82,40 +93,79 @@
             cursor: pointer;
             font-size: 16px;
         }
+
         .bold-price {
             font-weight: bold;
             color: #00ff00;
         }
+
         .error {
             color: #ff4500;
             margin-top: 10px;
         }
+
         label {
             color: #fff;
         }
+
+        #descriptionButton {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            padding: 8px 12px;
+            background-color: #444;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        #descriptionModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #222;
+            padding: 20px;
+            border: 1px solid #333;
+            z-index: 1000;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        #descriptionModal p {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
+
 <body>
 
-    <div id="logo">TBAY Rides</div>
+    <div id="logo">TBay Rides</div>
 
     <div id="calculator">
         <label for="totalKm">Total Kilometers:</label>
-        <input type="number" id="totalKm" value="0" min="0">
+        <input type="number" id="totalKm" aria-describedby="km-instructions" value="0" min="0">
+        <p id="km-instructions" style="font-size: 0.8em; margin-top: 5px;">Enter the total distance in kilometers.</p>
 
         <label for="priceSelect">Price Select:</label>
-        <select id="priceSelect">
-            <option value="1.45">Regular Price ($1.45/km)</option>
+        <select id="priceSelect" aria-label="Select price option">
+            <option value="1.85">Regular Price ($1.85/km)</option>
             <option value="2.00">Late Night Price ($2.00/km)</option>
             <option value="2.45">Special Weather Price ($2.45/km)</option>
         </select>
 
         <label for="discountSelect">Discount:</label>
-        <select id="discountSelect">
+        <select id="discountSelect" aria-label="Select discount option">
             <option value="0">No Discount</option>
             <option value="0.05">Returning Customer (5% Discount)</option>
             <option value="0.10">Returning Customer (10% Discount)</option>
         </select>
+
+        <label for="email">E-Transfer Email:</label>
+        <input type="email" id="email" placeholder="Enter your E-Transfer email">
 
         <button onclick="calculatePrice()">Calculate Price</button>
 
@@ -125,15 +175,32 @@
         <div id="error" class="error"></div>
     </div>
 
+    <button id="descriptionButton" onclick="showDescription()">Info</button>
+
+    <div id="descriptionModal">
+        <h2>How to Use</h2>
+        <ol>
+            <li>Enter the total distance of your trip in kilometers.</li>
+            <li>Select the applicable price rate (Regular, Late Night, or Special Weather).</li>
+            <li>Choose any applicable discounts.</li>
+            <li>Enter your E-Transfer email address.</li>
+            <li>Click "Calculate Price" to generate the fare breakdown.</li>
+            <li>Copy the message for your records or payment reference.</li>
+        </ol>
+        <p><strong>Note:</strong> The calculated price is non-negotiable. For distances below 3.4km, a minimum fare of $5.00 applies.</p>
+        <button onclick="hideDescription()">Close</button>
+    </div>
+
     <script>
         function calculatePrice() {
             const totalKm = parseFloat(document.getElementById("totalKm").value);
             const pricePerKm = parseFloat(document.getElementById("priceSelect").value);
             const discount = parseFloat(document.getElementById("discountSelect").value);
+            const email = document.getElementById("email").value;
             const errorDiv = document.getElementById("error");
 
-            if (isNaN(totalKm) || totalKm < 0) {
-                errorDiv.textContent = "Invalid input. Please enter valid positive numbers.";
+            if (isNaN(totalKm) || totalKm < 0 || email.trim() === "") {
+                errorDiv.textContent = "Invalid input. Please enter valid numbers and an email.";
                 document.getElementById("result").textContent = "";
                 document.getElementById("message").textContent = "";
                 document.getElementById('copyButton').style.display = "none";
@@ -145,12 +212,12 @@
             let totalPrice = calculateTotalPrice(totalKm, pricePerKm, discount);
 
             let resultText = "Total Price: $" + totalPrice.toFixed(2);
-            if(totalKm < 3.4 && totalPrice === 5){
+            if (totalKm < 3.4 && totalPrice === 5) {
                 resultText += " (Minimum $5.00 Price Applied)";
             }
 
             document.getElementById("result").textContent = resultText;
-            document.getElementById("message").innerHTML = generateMessage(totalPrice, totalKm, pricePerKm, discount, totalKm);
+            document.getElementById("message").innerHTML = generateMessage(totalPrice, totalKm, pricePerKm, discount, totalKm, email);
 
             document.getElementById('copyButton').style.display = "block";
         }
@@ -161,13 +228,13 @@
             return Math.max(5, totalPrice);
         }
 
-        function generateMessage(totalPrice, totalKm, pricePerKm, discount, totalKmInput) {
+        function generateMessage(totalPrice, totalKm, pricePerKm, discount, totalKmInput, email) {
             let message = `Hello,<br>`;
 
-            let priceType = "Regular ($1.45 per Km)";
-            if(pricePerKm === 2.00){
+            let priceType = "Regular ($1.85 per Km)";
+            if (pricePerKm === 2.00) {
                 priceType = "Late Night ($2.00 per Km)";
-            } else if (pricePerKm === 2.45){
+            } else if (pricePerKm === 2.45) {
                 priceType = "Special Weather ($2.45 per Km)";
             }
 
@@ -181,11 +248,11 @@
             }
             message += `Total: $${totalPrice.toFixed(2)}<br><br>`;
 
-            if(totalKmInput < 3.4){
+            if (totalKmInput < 3.4) {
                 message += `Your ride is below 3.4km, the minimum price has been set to $5.00.<br><br>`;
             }
 
-            message += `After pick up, please E-Transfer <span class='bold-price'>$${totalPrice.toFixed(2)}</span> to t.islam20001@gmail.com before reaching your destination.<br><br>Thank you for riding with me.<br><br>This is an automated message, all prices are non-negotiable.`;
+            message += `After pick up, please make the payment of <span class='bold-price'>$${totalPrice.toFixed(2)}</span> before reaching your destination.<br><br>E-Transfer Email: ${email}<br><br>Thank you for riding with us.<br><br>This is an automated message, all prices are non-negotiable.`;
             return message;
         }
 
@@ -203,6 +270,15 @@
                 alert('Could not copy text.');
             });
         }
+
+        function showDescription() {
+            document.getElementById("descriptionModal").style.display = "block";
+        }
+
+        function hideDescription() {
+            document.getElementById("descriptionModal").style.display = "none";
+        }
     </script>
 </body>
+
 </html>
